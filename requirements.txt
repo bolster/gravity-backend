@@ -1,5 +1,6 @@
-args==0.1.0
-clint==0.3.6
-dj-database-url==0.3.0
-Django==1.6.2
+Flask==0.10.1
+itsdangerous==0.24
+Jinja2==2.7.2
+MarkupSafe==0.19
+Werkzeug==0.9.4
 wolframalpha==1.0.2
