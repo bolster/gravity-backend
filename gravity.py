@@ -17,6 +17,10 @@ db.locations.ensure_index([('location', GEOSPHERE)])
 
 
 class LocationResource(FlaskResource):
+    fields = {
+        'acceleration': 'acceleration',
+        'location': 'location',
+    }
 
     def list(self):
         query = self.request.args.to_dict()
@@ -33,11 +37,7 @@ class LocationResource(FlaskResource):
             }}).limit(1)
 
         if cached.count() > 0:
-            location = cached[0]
-            return {
-                'acceleration': location['acceleration'],
-                'location': location['location'],
-            }
+            return cached[0]
 
         client = wolframalpha.Client(APP_ID)
         result = client.query(
