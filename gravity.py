@@ -42,8 +42,8 @@ class LocationResource(FlaskResource):
         client = wolframalpha.Client(APP_ID)
         result = client.query(
             'gravitational acceleration {} {}'.format(
-                location['coordinates'][0],
-                location['coordinates'][1]))
+                location['coordinates'][1],
+                location['coordinates'][0]))
         pod = [
             pod.text for pod in result.pods
             if pod.text and pod.text.startswith('total field')
