@@ -27,8 +27,10 @@ class LocationResource(FlaskResource):
 
         cached = db.locations.find({
             "location": {
-                "$nearSphere": location
+                "$nearSphere": location,
+                '$maxDistance': 500,
             }}).limit(1)
+
         if cached.count() > 0:
             location = cached[0]
             return {
