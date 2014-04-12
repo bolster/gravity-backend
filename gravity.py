@@ -7,7 +7,7 @@ from restless.fl import FlaskResource
 
 app = Flask(__name__)
 
-APP_ID = os.getenv('APP_ID2405')
+APP_ID = os.getenv('APP_ID')
 
 client = MongoClient(
     os.getenv('MONGOHQ_URL', 'mongodb://localhost:27017/gravity')
