@@ -2,35 +2,56 @@ import os
 import wolframalpha
 
 from flask import Flask
-from restless.exceptions import NotFound
+from pymongo import MongoClient, GEOSPHERE
 from restless.fl import FlaskResource
 
 app = Flask(__name__)
 
 APP_ID = os.environ['APP_ID']
 
+db = MongoClient(
+    os.getenv('MONGOHQ_URL', 'mongodb://localhost:27017/')
+).gravity
+db.locations.ensure_index([("location", GEOSPHERE)])
+
 
 class LocationResource(FlaskResource):
 
     def list(self):
-        query = dict(self.request.args).get('q', None)
+        query = self.request.args.to_dict()
 
-        if query is None:
-            raise NotFound('Location not found or not specified.')
+        location = {
+            'type': 'Point',
+            'coordinates': [float(query['long']), float(query['lat'])],
+        }
 
-        location = query[0]
+        cached = db.locations.find({"location": {"$near": location}}).limit(1)
+        if cached.count() > 0:
+            location = cached[0]
+            return {
+                'acceleration': location['acceleration'],
+                'location': location['location'],
+            }
+
         client = wolframalpha.Client(APP_ID)
-        result = client.query('gravitation acceleration {}'.format(location))
+        result = client.query(
+            'gravitational acceleration {} {}'.format(
+                location['coordinates'][0],
+                location['coordinates'][1]))
         pod = [
             pod.text for pod in result.pods
             if pod.text and pod.text.startswith('total field')
         ][0].split('\n')[0]
         acceleration = float(pod.split('|')[1].strip().split(' ')[0])
 
-        return [{
-            'location': location,
+        result = {
             'acceleration': acceleration,
-        }]
+            'location': location,
+        }
+
+        db.locations.insert(result)
+
+        return result
 
     def serialize(self, method, endpoint, data):
         return self.serialize_detail(data)
