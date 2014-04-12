@@ -32,6 +32,9 @@ class LocationResource(FlaskResource):
             'acceleration': acceleration,
         }]
 
+    def serialize(self, method, endpoint, data):
+        return self.serialize_detail(data)
+
 
 LocationResource.add_url_rules(app, '/api/v1/location/', 'location')
 
