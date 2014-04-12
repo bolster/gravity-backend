@@ -2,17 +2,17 @@ import os
 import wolframalpha
 
 from flask import Flask
-from pymongo import MongoClient, GEOSPHERE
+from pymongo import MongoClient
 from restless.fl import FlaskResource
 
 app = Flask(__name__)
 
-APP_ID = os.environ['APP_ID']
+APP_ID = os.getenv('APP_ID2405')
 
-db = MongoClient(
-    os.getenv('MONGOHQ_URL', 'mongodb://localhost:27017/')
-).gravity
-db.locations.ensure_index([("location", GEOSPHERE)])
+client = MongoClient(
+    os.getenv('MONGOHQ_URL', 'mongodb://localhost:27017/gravity')
+)
+db = getattr(client, os.getenv('DATABASE_NAME', 'gravity'))
 
 
 class LocationResource(FlaskResource):
