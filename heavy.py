@@ -8,7 +8,7 @@ from clint.textui import puts, colored, indent
 
 args = Args()
 
-location = args.get(0)
+location = ' '.join(args.all)
 
 if location is None:
     puts(colored.red('You must provide a location.'))
@@ -22,5 +22,6 @@ else:
         pod.text for pod in result.pods
         if pod.text and pod.text.startswith('total field')
     ][0].split('\n')[0]
+    acceleration = float(pod.split('|')[1].strip().split(' ')[0])
     with indent(4, quote='>>>'):
-        puts(colored.red(pod))
+        puts(colored.red('{} m/s^2'.format(acceleration)))
