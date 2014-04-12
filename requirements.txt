@@ -4,5 +4,6 @@ Jinja2==2.7.2
 MarkupSafe==0.19
 restless==1.4.0
 six==1.6.1
+waitress==0.8.8
 Werkzeug==0.9.4
 wolframalpha==1.0.2
