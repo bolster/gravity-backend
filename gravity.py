@@ -36,4 +36,4 @@ class LocationResource(FlaskResource):
 LocationResource.add_url_rules(app, '/api/v1/location/', 'location')
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug='DEBUG' in os.environ and os.environ['DEBUG'] == 'True')
