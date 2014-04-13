@@ -74,7 +74,7 @@ class LocationResource(FlaskResource):
                 'Publisher': 'Wolfram Alpha LLC',
                 'URL': 'http://api.wolframalpha.com/v2/query?{}'.format(
                     urlencode({'input': wolfram_query})),
-                'Date': datetime.utcnow().isoformat(),
+                'Date': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'),
             }
         }
 
