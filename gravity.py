@@ -2,6 +2,7 @@ import os
 import wolframalpha
 
 from datetime import datetime
+from decimal import Decimal
 from urllib import urlencode
 
 from flask import Flask
@@ -33,7 +34,7 @@ class LocationResource(FlaskResource):
 
         location = {
             'type': 'Point',
-            'coordinates': [float(query['long']), float(query['lat'])],
+            'coordinates': [Decimal(query['long']), Decimal(query['lat'])],
         }
 
         client = MongoClient(
@@ -41,6 +42,9 @@ class LocationResource(FlaskResource):
         )
         db = getattr(client, os.getenv('DATABASE_NAME', 'gravity'))
         db.locations.ensure_index([('location', GEOSPHERE)])
+
+        location['coordinates'] = map(float, location['coordinates'])
+
         cached = db.locations.find({
             "location": {
                 "$nearSphere": location,
