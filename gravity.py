@@ -1,8 +1,12 @@
 import os
 import wolframalpha
 
+from datetime import datetime
+from urllib import urlencode
+
 from flask import Flask
 from pymongo import MongoClient, GEOSPHERE
+from pytz import utc
 from restless.fl import FlaskResource
 
 app = Flask(__name__)
@@ -20,6 +24,7 @@ class LocationResource(FlaskResource):
     fields = {
         'acceleration': 'acceleration',
         'location': 'location',
+        'source': 'source',
     }
 
     def list(self):
@@ -45,10 +50,10 @@ class LocationResource(FlaskResource):
             return cached[0]
 
         client = wolframalpha.Client(APP_ID)
-        result = client.query(
-            'gravitational acceleration {} {}'.format(
-                location['coordinates'][1],
-                location['coordinates'][0]))
+        wolfram_query = 'gravitational acceleration {} {}'.format(
+            location['coordinates'][1],
+            location['coordinates'][0])
+        result = client.query(wolfram_query)
         pod = [
             pod.text for pod in result.pods
             if pod.text and pod.text.startswith('total field')
@@ -58,6 +63,13 @@ class LocationResource(FlaskResource):
         result = {
             'acceleration': acceleration,
             'location': location,
+            'source': {
+                'Author/Site': 'Wolfram|Alpha',
+                'Publisher': 'Wolfram Alpha LLC',
+                'URL': 'http://api.wolframalpha.com/v2/query?{}'.format(
+                    urlencode({'input': wolfram_query})),
+                'Retrieval date': utc.localize(datetime.utcnow()).isoformat(),
+            }
         }
 
         db.locations.insert(result)
