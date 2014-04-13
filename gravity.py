@@ -2,6 +2,7 @@ import os
 import wolframalpha
 
 from datetime import datetime
+from decimal import Decimal
 from urllib import urlencode
 
 from flask import Flask
@@ -12,6 +13,7 @@ from restless.fl import FlaskResource
 app = Flask(__name__)
 
 APP_ID = os.getenv('APP_ID')
+DEBUG = 'DEBUG' in os.environ and os.environ['DEBUG'] == 'True'
 
 client = MongoClient(
     os.getenv('MONGOHQ_URL', 'mongodb://localhost:27017/gravity')
@@ -32,7 +34,7 @@ class LocationResource(FlaskResource):
 
         location = {
             'type': 'Point',
-            'coordinates': [float(query['long']), float(query['lat'])],
+            'coordinates': [Decimal(query['long']), Decimal(query['lat'])],
         }
 
         client = MongoClient(
@@ -40,6 +42,9 @@ class LocationResource(FlaskResource):
         )
         db = getattr(client, os.getenv('DATABASE_NAME', 'gravity'))
         db.locations.ensure_index([('location', GEOSPHERE)])
+
+        location['coordinates'] = map(float, location['coordinates'])
+
         cached = db.locations.find({
             "location": {
                 "$nearSphere": location,
@@ -79,8 +84,11 @@ class LocationResource(FlaskResource):
     def serialize(self, method, endpoint, data):
         return self.serialize_detail(data)
 
+    def bubble_exceptions(self):
+        return DEBUG
+
 
 LocationResource.add_url_rules(app, '/api/v1/location/', 'location')
 
 if __name__ == "__main__":
-    app.run(debug='DEBUG' in os.environ and os.environ['DEBUG'] == 'True')
+    app.run(debug=DEBUG)
