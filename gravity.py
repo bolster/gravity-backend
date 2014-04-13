@@ -12,6 +12,7 @@ from restless.fl import FlaskResource
 app = Flask(__name__)
 
 APP_ID = os.getenv('APP_ID')
+DEBUG = 'DEBUG' in os.environ and os.environ['DEBUG'] == 'True'
 
 client = MongoClient(
     os.getenv('MONGOHQ_URL', 'mongodb://localhost:27017/gravity')
@@ -79,8 +80,11 @@ class LocationResource(FlaskResource):
     def serialize(self, method, endpoint, data):
         return self.serialize_detail(data)
 
+    def bubble_exceptions(self):
+        return DEBUG
+
 
 LocationResource.add_url_rules(app, '/api/v1/location/', 'location')
 
 if __name__ == "__main__":
-    app.run(debug='DEBUG' in os.environ and os.environ['DEBUG'] == 'True')
+    app.run(debug=DEBUG)
