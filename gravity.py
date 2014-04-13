@@ -14,12 +14,6 @@ app = Flask(__name__)
 APP_ID = os.getenv('APP_ID')
 DEBUG = 'DEBUG' in os.environ and os.environ['DEBUG'] == 'True'
 
-client = MongoClient(
-    os.getenv('MONGOHQ_URL', 'mongodb://localhost:27017/gravity')
-)
-db = getattr(client, os.getenv('DATABASE_NAME', 'gravity'))
-db.locations.ensure_index([('location', GEOSPHERE)])
-
 
 class LocationResource(FlaskResource):
     fields = {
