@@ -30,6 +30,11 @@ class LocationResource(FlaskResource):
             'coordinates': [float(query['long']), float(query['lat'])],
         }
 
+        client = MongoClient(
+            os.getenv('MONGOHQ_URL', 'mongodb://localhost:27017/gravity')
+        )
+        db = getattr(client, os.getenv('DATABASE_NAME', 'gravity'))
+        db.locations.ensure_index([('location', GEOSPHERE)])
         cached = db.locations.find({
             "location": {
                 "$nearSphere": location,
