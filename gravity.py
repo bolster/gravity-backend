@@ -45,14 +45,17 @@ class LocationResource(FlaskResource):
 
         location['coordinates'] = map(float, location['coordinates'])
 
-        cached = db.locations.find({
-            "location": {
-                "$nearSphere": location,
-                '$maxDistance': 500,
-            }}).limit(1)
-
-        if cached.count() > 0:
-            return cached[0]
+        try:
+            cached = db.locations.find({
+                "location": {
+                    "$nearSphere": location,
+                    '$maxDistance': 500,
+                }}).limit(1)
+        except:
+            pass
+        else:
+            if cached.count() > 0:
+                return cached[0]
 
         client = wolframalpha.Client(APP_ID)
         wolfram_query = 'gravitational acceleration {} {}'.format(
@@ -77,7 +80,10 @@ class LocationResource(FlaskResource):
             }
         }
 
-        db.locations.insert(result)
+        try:
+            db.locations.insert(result)
+        except:
+            pass
 
         return result
 
