@@ -7,7 +7,6 @@ from urllib import urlencode
 
 from flask import Flask
 from pymongo import MongoClient, GEOSPHERE
-from pytz import utc
 from restless.fl import FlaskResource
 
 app = Flask(__name__)
@@ -76,7 +75,7 @@ class LocationResource(FlaskResource):
                 'Publisher': 'Wolfram Alpha LLC',
                 'URL': 'http://api.wolframalpha.com/v2/query?{}'.format(
                     urlencode({'input': wolfram_query})),
-                'Date': utc.localize(datetime.utcnow()).isoformat(),
+                'Date': datetime.utcnow().isoformat(),
             }
         }
 
