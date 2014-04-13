@@ -50,11 +50,10 @@ class LocationResource(FlaskResource):
                     "$nearSphere": location,
                     '$maxDistance': 500,
                 }}).limit(1)
-        except:
-            pass
-        else:
             if cached.count() > 0:
                 return cached[0]
+        except:
+            pass
 
         client = wolframalpha.Client(APP_ID)
         wolfram_query = 'gravitational acceleration {} {}'.format(
