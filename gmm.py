@@ -1,11 +1,13 @@
-from decimal import Decimal, Context, getcontext, ROUND_DOWN
-import math
+from decimal import Decimal, getcontext, ROUND_DOWN
 import requests
 import struct
 
+
 class GMMDataSource(object):
     URI_PREFIX = "http://gravityapp.s3.amazonaws.com/ga/"
-    DATA_FORMAT = ">i" # BIG endian int32 as specified in http://ddfe.curtin.edu.au/gravitymodels/GGMplus/GGMplus_readme.dat
+    # BIG endian int32 as specified in
+    # http://ddfe.curtin.edu.au/gravitymodels/GGMplus/GGMplus_readme.dat
+    DATA_FORMAT = ">i"
 
     ROW_WIDTH = 2500
     COLUMN_HEIGHT = 2500
@@ -34,7 +36,7 @@ class GMMDataSource(object):
             lon_ref = (int(lon) / 5) * 5
         
         return "%s%02d%s%03d.ga" % (latitude_direction, lat_ref,
-            longitude_direction, lon_ref)
+                                    longitude_direction, lon_ref)
 
     def get_data_offset(self, lat, lon):
         """
@@ -46,7 +48,6 @@ class GMMDataSource(object):
         point).
         """
         c = getcontext()
-
         FIVE = Decimal('5.0')
 
         lat_effective = c.divmod(lat, FIVE)[1].quantize(Decimal('.001'), rounding=ROUND_DOWN)
@@ -83,3 +84,4 @@ class GMMDataSource(object):
         except Exception, e:
             print e
             return None
+

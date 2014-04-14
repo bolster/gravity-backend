@@ -7,19 +7,12 @@ from urllib import urlencode
 
 from flask import Flask
 from pymongo import MongoClient, GEOSPHERE
-from pytz import utc
 from restless.fl import FlaskResource
 
 app = Flask(__name__)
 
 APP_ID = os.getenv('APP_ID')
 DEBUG = 'DEBUG' in os.environ and os.environ['DEBUG'] == 'True'
-
-client = MongoClient(
-    os.getenv('MONGOHQ_URL', 'mongodb://localhost:27017/gravity')
-)
-db = getattr(client, os.getenv('DATABASE_NAME', 'gravity'))
-db.locations.ensure_index([('location', GEOSPHERE)])
 
 
 class LocationResource(FlaskResource):
@@ -45,14 +38,16 @@ class LocationResource(FlaskResource):
 
         location['coordinates'] = map(float, location['coordinates'])
 
-        cached = db.locations.find({
-            "location": {
-                "$nearSphere": location,
-                '$maxDistance': 500,
-            }}).limit(1)
-
-        if cached.count() > 0:
-            return cached[0]
+        try:
+            cached = db.locations.find({
+                "location": {
+                    "$nearSphere": location,
+                    '$maxDistance': 500,
+                }}).limit(1)
+            if cached.count() > 0:
+                return cached[0]
+        except:
+            pass
 
         client = wolframalpha.Client(APP_ID)
         wolfram_query = 'gravitational acceleration {} {}'.format(
@@ -73,11 +68,14 @@ class LocationResource(FlaskResource):
                 'Publisher': 'Wolfram Alpha LLC',
                 'URL': 'http://api.wolframalpha.com/v2/query?{}'.format(
                     urlencode({'input': wolfram_query})),
-                'Retrieval date': utc.localize(datetime.utcnow()).isoformat(),
+                'Date': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'),
             }
         }
 
-        db.locations.insert(result)
+        try:
+            db.locations.insert(result)
+        except:
+            pass
 
         return result
 
