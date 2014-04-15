@@ -3,6 +3,7 @@ import os
 from decimal import Decimal
 
 from flask import Flask
+from gmm import GMMDataSource
 from restless.fl import FlaskResource
 from wolfram import WolframAlphaDataSource
 
@@ -26,6 +27,12 @@ class LocationResource(FlaskResource):
             'type': 'Point',
             'coordinates': [Decimal(query['long']), Decimal(query['lat'])],
         }
+
+        gmm_source = GMMDataSource()
+        result = gmm_source.get_gravitational_acceleration_at_point(location)
+
+        if result is not None:
+            return result
 
         wolfram_source = WolframAlphaDataSource(APP_ID)
         result = wolfram_source.get_gravitational_acceleration_at_point(
