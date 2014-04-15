@@ -108,8 +108,8 @@ class GMMDataSource(object):
 
     def get_source(self):
         return {
-            'Author/Site': 'GMM',
-            'Publisher': 'GMM',
-            'URL': 'url',
+            'Author/Site': 'Christian Hirt',
+            'Publisher': 'Western Australian Centre for Geodesy, Curtin University Perth',
+            'URL': 'http://ddfe.curtin.edu.au/gravitymodels/GGMplus/GGMplus_readme.dat',
             'Date': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'),
         }
