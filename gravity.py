@@ -28,17 +28,16 @@ class LocationResource(FlaskResource):
             'coordinates': [Decimal(query['long']), Decimal(query['lat'])],
         }
 
-        gmm_source = GMMDataSource()
-        result = gmm_source.get_gravitational_acceleration_at_point(location)
-
-        if result is not None:
+        try:
+            gmm_source = GMMDataSource()
+            result = gmm_source.get_gravitational_acceleration_at_point(
+                location)
+        except:
+            wolfram_source = WolframAlphaDataSource(APP_ID)
+            result = wolfram_source.get_gravitational_acceleration_at_point(
+                location)
+        finally:
             return result
-
-        wolfram_source = WolframAlphaDataSource(APP_ID)
-        result = wolfram_source.get_gravitational_acceleration_at_point(
-            location)
-
-        return result
 
     def serialize(self, method, endpoint, data):
         return self.serialize_detail(data)
