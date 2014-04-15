@@ -1,6 +1,7 @@
 import requests
 import struct
 
+from datetime import datetime
 from decimal import Decimal, getcontext, ROUND_DOWN
 
 
@@ -75,7 +76,22 @@ class GMMDataSource(object):
 
         return record_offset * 4
 
-    def get_gravitational_acceleration_at_point(self, lat, lon):
+    def get_gravitational_acceleration_at_point(self, location):
+        lat = location['coordinates'][1]
+        lon = location['coordinates'][0]
+
+        acceleration = self.get_acceleration(lat, lon)
+
+        if acceleration is None:
+            return acceleration
+
+        return {
+            'acceleration': acceleration,
+            'location': location,
+            'source': self.get_source(),
+        }
+
+    def get_acceleration(self, lat, lon):
         try:
             filename = self.pick_file(lat, lon)
             url = "%s%s" % (self.URI_PREFIX, filename)
@@ -85,7 +101,15 @@ class GMMDataSource(object):
             val = struct.unpack(self.DATA_FORMAT, r.content)[0]
             if val == -2 ** 31:
                 raise ValueError("No data available.")
-            return val * .1
+            return val * .000001
         except Exception, e:
             print e
             return None
+
+    def get_source(self):
+        return {
+            'Author/Site': 'GMM',
+            'Publisher': 'GMM',
+            'URL': 'url',
+            'Date': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'),
+        }
